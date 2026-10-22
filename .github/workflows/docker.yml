@@ -61,3 +61,43 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency: deploy-vps
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copier les fichiers de déploiement
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy/docker-compose.yml,deploy/Caddyfile
+          target: ${{ secrets.VPS_PATH }}
+          strip_components: 1
+
+      - name: Mettre à jour la stack
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: GHCR_USER,GHCR_TOKEN
+          script_stop: true
+          script: |
+            cd "${{ secrets.VPS_PATH }}"
+            test -f .env || { echo ".env manquant sur le VPS"; exit 1; }
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f
+            docker compose ps
