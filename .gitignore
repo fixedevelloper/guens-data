@@ -3,5 +3,5 @@ data/
 .idea/
 *.iml
 .env
-mobile
+/mobile
 deploy
