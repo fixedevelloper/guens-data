@@ -2,7 +2,7 @@
 import { FormEvent, useState } from 'react';
 import { api } from '@/lib/api';
 import { AppItem, City } from '@/lib/types';
-import { Badge, ErrorBox, errMsg, Field, Modal, useLoad } from '@/components/ui';
+import { Badge, ErrorBox, errMsg, Field, Modal, PageHeader, useLoad } from '@/components/ui';
 
 type AppForm = { id?: number; code: string; name: string; description: string; active: boolean };
 
@@ -46,7 +46,7 @@ export default function ApplicationsPage() {
 
   return (
     <>
-      <h1>Applications</h1>
+      <PageHeader title="Applications" subtitle="Formulaires de collecte et villes de déploiement" />
       <ErrorBox error={error ?? apps.error ?? cities.error} />
       <div className="card">
         <div className="toolbar">
@@ -63,13 +63,13 @@ export default function ApplicationsPage() {
                 <td>{a.cityIds.length ? a.cityIds.map(cityName).join(', ') : <span className="muted">Aucune</span>}</td>
                 <td><Badge kind={a.active ? 'ok' : 'off'}>{a.active ? 'Active' : 'Inactive'}</Badge></td>
                 <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <button onClick={() => setDeploy({ app: a, selected: new Set(a.cityIds) })}>Villes</button>{' '}
-                  <button onClick={() => setForm({ id: a.id, code: a.code, name: a.name, description: a.description ?? '', active: a.active })}>Modifier</button>{' '}
-                  <button className="danger" onClick={() => remove(a)}>Supprimer</button>
+                  <button className="sm" onClick={() => setDeploy({ app: a, selected: new Set(a.cityIds) })}>Villes</button>{' '}
+                  <button className="sm" onClick={() => setForm({ id: a.id, code: a.code, name: a.name, description: a.description ?? '', active: a.active })}>Modifier</button>{' '}
+                  <button className="danger sm" onClick={() => remove(a)}>Supprimer</button>
                 </td>
               </tr>
             ))}
-            {apps.data?.length === 0 && <tr><td colSpan={5} className="muted">Aucune application.</td></tr>}
+            {apps.data?.length === 0 && <tr><td colSpan={5} className="empty">Aucune application.</td></tr>}
           </tbody>
         </table></div>
       </div>

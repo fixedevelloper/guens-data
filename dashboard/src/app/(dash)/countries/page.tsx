@@ -2,7 +2,7 @@
 import { FormEvent, useState } from 'react';
 import { api } from '@/lib/api';
 import { City, Country } from '@/lib/types';
-import { Badge, ErrorBox, errMsg, Field, Modal, useLoad } from '@/components/ui';
+import { Badge, ErrorBox, errMsg, Field, Modal, PageHeader, useLoad } from '@/components/ui';
 
 type CountryForm = { id?: number; isoCode: string; name: string; active: boolean };
 type CityForm = { id?: number; countryId: number; name: string; active: boolean };
@@ -42,7 +42,7 @@ export default function CountriesPage() {
 
   return (
     <>
-      <h1>Pays & villes</h1>
+      <PageHeader title="Pays & villes" subtitle="Référentiel géographique de la collecte" />
       <ErrorBox error={error ?? countries.error ?? cities.error} />
 
       <div className="card">
@@ -58,8 +58,8 @@ export default function CountriesPage() {
                 <td>{c.isoCode}</td><td>{c.name}</td>
                 <td><Badge kind={c.active ? 'ok' : 'off'}>{c.active ? 'Actif' : 'Inactif'}</Badge></td>
                 <td style={{ textAlign: 'right' }}>
-                  <button onClick={() => setCountryForm({ ...c })}>Modifier</button>{' '}
-                  <button className="danger" onClick={() => remove('countries', c.id, c.name)}>Supprimer</button>
+                  <button className="sm" onClick={() => setCountryForm({ ...c })}>Modifier</button>{' '}
+                  <button className="danger sm" onClick={() => remove('countries', c.id, c.name)}>Supprimer</button>
                 </td>
               </tr>
             ))}
@@ -89,12 +89,12 @@ export default function CountriesPage() {
                 <td>{c.name}</td><td>{c.countryName}</td>
                 <td><Badge kind={c.active ? 'ok' : 'off'}>{c.active ? 'Active' : 'Inactive'}</Badge></td>
                 <td style={{ textAlign: 'right' }}>
-                  <button onClick={() => setCityForm({ id: c.id, countryId: c.countryId, name: c.name, active: c.active })}>Modifier</button>{' '}
-                  <button className="danger" onClick={() => remove('cities', c.id, c.name)}>Supprimer</button>
+                  <button className="sm" onClick={() => setCityForm({ id: c.id, countryId: c.countryId, name: c.name, active: c.active })}>Modifier</button>{' '}
+                  <button className="danger sm" onClick={() => remove('cities', c.id, c.name)}>Supprimer</button>
                 </td>
               </tr>
             ))}
-            {cities.data?.length === 0 && <tr><td colSpan={4} className="muted">Aucune ville.</td></tr>}
+            {cities.data?.length === 0 && <tr><td colSpan={4} className="empty">Aucune ville.</td></tr>}
           </tbody>
         </table></div>
       </div>

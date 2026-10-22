@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { api, documentUrl, exportUrl, signatureUrl } from '@/lib/api';
 import { AppItem, City, Country, Page, PersonDetail, PersonSummary } from '@/lib/types';
-import { Badge, ErrorBox, fmtDate, Field, Modal, Pager, useLoad } from '@/components/ui';
+import { Badge, ErrorBox, fmtDate, Field, Modal, PageHeader, Pager, Who, useLoad } from '@/components/ui';
 
 export default function PersonsPage() {
   const [f, setF] = useState({ q: '', countryId: '', cityId: '', applicationId: '', captureMode: '', from: '', to: '' });
@@ -20,7 +20,7 @@ export default function PersonsPage() {
 
   return (
     <>
-      <h1>Enregistrements</h1>
+      <PageHeader title="Enregistrements" subtitle="Personnes collectées par les agents sur le terrain" />
       <ErrorBox error={list.error} />
       <div className="card">
         <div className="toolbar">
@@ -63,7 +63,7 @@ export default function PersonsPage() {
           <tbody>
             {list.data?.content.map((p) => (
               <tr key={p.id} className="click" onClick={() => setOpenId(p.id)}>
-                <td>{p.lastName} {p.firstName}</td>
+                <td><Who name={`${p.firstName} ${p.lastName}`} sub={`${p.cityName}, ${p.countryName}`} /></td>
                 <td>{p.documentType ? `${p.documentType} ${p.documentNumberMasked ?? ''}` : <span className="muted">—</span>}
                   {p.hasDocumentImage && <> <Badge>image</Badge></>}</td>
                 <td>{p.applicationName}</td><td>{p.cityName}, {p.countryName}</td><td>{p.agentName}</td>
@@ -71,7 +71,7 @@ export default function PersonsPage() {
                 <td>{fmtDate(p.createdAt)}</td>
               </tr>
             ))}
-            {list.data?.content.length === 0 && <tr><td colSpan={7} className="muted">Aucun résultat.</td></tr>}
+            {list.data?.content.length === 0 && <tr><td colSpan={7} className="empty">Aucun résultat.</td></tr>}
           </tbody>
         </table></div>
         <Pager page={page} totalPages={list.data?.totalPages ?? 0} onChange={setPage} />
@@ -102,7 +102,7 @@ function PersonModal({ id, onClose }: { id: number; onClose: () => void }) {
       <ErrorBox error={error} />
       {p && (
         <div className="grid cols2">
-          <dl className="kv" style={{ gridTemplateColumns: '150px 1fr', alignContent: 'start' }}>
+          <dl className="kv kv-s">
             {rows.map(([k, v]) => (<><dt key={`k${k}`}>{k}</dt><dd key={`v${k}`}>{v}</dd></>))}
           </dl>
           <div>

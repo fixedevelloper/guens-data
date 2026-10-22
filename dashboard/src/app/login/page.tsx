@@ -30,8 +30,12 @@ export default function LoginPage() {
   return (
     <div className="login">
       <form className="card form" onSubmit={submit}>
-        <h1 style={{ margin: 0 }}>Administration</h1>
-        <p className="muted" style={{ margin: 0 }}>Collecte terrain</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="login-logo" src="/assets/logo.png" alt="Guen's Data" />
+        <div>
+          <h1>Bon retour 👋</h1>
+          <p className="muted" style={{ margin: '2px 0 0' }}>Collecter · Organiser · Valoriser — connectez-vous pour continuer</p>
+        </div>
         {error && <div className="error" role="alert">{error}</div>}
         <label className="f">Identifiant<input name="username" autoComplete="username" required autoFocus /></label>
         <label className="f">Mot de passe<input name="password" type="password" autoComplete="current-password" required /></label>

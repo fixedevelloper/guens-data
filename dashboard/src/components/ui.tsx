@@ -89,26 +89,74 @@ export function BarList({ rows }: { rows: { label: string; value: number }[] }) 
 
 export function Timeline({ points }: { points: { day: string; count: number }[] }) {
   if (points.length === 0) return <p className="muted">Aucune donnée.</p>;
-  const W = 640, H = 160, P = 24;
+  const W = 720, H = 220, PX = 16, PT = 24, PB = 28;
   const max = Math.max(1, ...points.map((p) => p.count));
-  const bw = Math.max(2, (W - P * 2) / points.length - 3);
+  const step = points.length > 1 ? (W - PX * 2) / (points.length - 1) : 0;
+  const xy = points.map((p, i) => [PX + (points.length > 1 ? i * step : (W - PX * 2) / 2), PT + (1 - p.count / max) * (H - PT - PB)] as const);
+  const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const area = `${line} L${xy[xy.length - 1][0]},${H - PB} L${xy[0][0]},${H - PB} Z`;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Enregistrements par jour">
-      {points.map((p, i) => {
-        const h = (p.count / max) * (H - P * 2);
-        const x = P + i * ((W - P * 2) / points.length);
-        return (
-          <g key={p.day}>
-            <rect x={x} y={H - P - h} width={bw} height={h} rx={2} fill="var(--bar-fill)">
-              <title>{`${p.day} : ${p.count}`}</title>
-            </rect>
-          </g>
-        );
+    <svg className="chart" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Enregistrements par jour">
+      <defs>
+        <linearGradient id="tl-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0b57d0" stopOpacity=".35" />
+          <stop offset="100%" stopColor="#2f9e44" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="tl-line" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#0b57d0" /><stop offset="100%" stopColor="#2f9e44" />
+        </linearGradient>
+      </defs>
+      {[0, 0.5, 1].map((t) => {
+        const y = PT + t * (H - PT - PB);
+        return <line key={t} x1={PX} x2={W - PX} y1={y} y2={y} stroke="var(--border)" strokeDasharray="4 4" />;
       })}
-      <text x={P} y={H - 6} fontSize="10" fill="var(--muted)">{points[0].day}</text>
-      <text x={W - P} y={H - 6} fontSize="10" fill="var(--muted)" textAnchor="end">{points[points.length - 1].day}</text>
-      <text x={P} y={12} fontSize="10" fill="var(--muted)">max {max}</text>
+      <path d={area} fill="url(#tl-fill)" />
+      <path d={line} fill="none" stroke="url(#tl-line)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+      {xy.map(([x, y], i) => (
+        <circle key={points[i].day} cx={x} cy={y} r={points.length > 40 ? 0 : 3.5} fill="var(--surface)" stroke="#0b57d0" strokeWidth={2}>
+          <title>{`${points[i].day} : ${points[i].count}`}</title>
+        </circle>
+      ))}
+      <text x={PX} y={H - 8} fontSize="11" fill="var(--muted)">{points[0].day}</text>
+      <text x={W - PX} y={H - 8} fontSize="11" fill="var(--muted)" textAnchor="end">{points[points.length - 1].day}</text>
+      <text x={W - PX} y={14} fontSize="11" fill="var(--muted)" textAnchor="end">max {max}</text>
     </svg>
+  );
+}
+
+export function PageHeader({ title, subtitle, children }: { title: string; subtitle?: string; children?: ReactNode }) {
+  return (
+    <div className="page-head">
+      <div><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
+      {children && <div className="row">{children}</div>}
+    </div>
+  );
+}
+
+const HUES = ['#0b57d0', '#2f9e44', '#1a73e8', '#f59e0b', '#0f9d9a', '#7c3aed', '#e5484d', '#3b82f6'];
+
+/** Avatar à initiales, couleur stable dérivée du nom. */
+export function Avatar({ name }: { name: string }) {
+  const parts = name.trim().split(/\s+/);
+  const initials = ((parts[0]?.[0] ?? '?') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).slice(0, 2);
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const a = HUES[h % HUES.length], b = HUES[(h >> 3) % HUES.length];
+  return <span className="avatar" style={{ background: `linear-gradient(135deg, ${a}, ${b})` }} aria-hidden="true">{initials}</span>;
+}
+
+export function Who({ name, sub }: { name: string; sub?: ReactNode }) {
+  return <div className="who"><Avatar name={name} /><div><b>{name}</b>{sub && <span>{sub}</span>}</div></div>;
+}
+
+export function Kpi({ label, value, icon, hero }: { label: string; value: ReactNode; icon: ReactNode; hero?: boolean }) {
+  return (
+    <div className={`card kpi${hero ? ' hero' : ''}`} style={{ marginBottom: 0 }}>
+      <span className="kpi-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icon}</svg>
+      </span>
+      <div><div className="v">{value ?? <span className="skel" style={{ display: 'inline-block', width: 56, height: 26 }} />}</div><div className="l">{label}</div></div>
+    </div>
   );
 }
 

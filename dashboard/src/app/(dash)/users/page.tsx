@@ -2,7 +2,7 @@
 import { FormEvent, useState } from 'react';
 import { api } from '@/lib/api';
 import { AppItem, City, Page, Role, UserItem } from '@/lib/types';
-import { Badge, ErrorBox, errMsg, fmtDate, Field, Modal, Pager, useLoad } from '@/components/ui';
+import { Badge, ErrorBox, errMsg, fmtDate, Field, Modal, PageHeader, Pager, Who, useLoad } from '@/components/ui';
 
 export default function UsersPage() {
   const [q, setQ] = useState('');
@@ -18,7 +18,7 @@ export default function UsersPage() {
 
   return (
     <>
-      <h1>Agents & appareils</h1>
+      <PageHeader title="Agents & appareils" subtitle="Comptes, appareils liés et affectations" />
       <ErrorBox error={list.error} />
       <div className="card">
         <div className="toolbar">
@@ -42,7 +42,7 @@ export default function UsersPage() {
           <tbody>
             {list.data?.content.map((u) => (
               <tr key={u.id} className="click" onClick={() => setOpenId(u.id)}>
-                <td>{u.fullName}</td><td>{u.username}</td><td>{u.role}</td>
+                <td><Who name={u.fullName} sub={u.phone ?? undefined} /></td><td>{u.username}</td><td><Badge kind={u.role === 'ADMIN' ? 'warn' : undefined}>{u.role === 'ADMIN' ? 'Admin' : 'Agent'}</Badge></td>
                 <td>{u.role === 'ADMIN' ? <span className="muted">—</span>
                   : u.deviceId ? <Badge kind="ok">{u.deviceModel ?? 'Lié'}</Badge> : <Badge>Non lié</Badge>}</td>
                 <td>{fmtDate(u.lastLoginAt)}</td>
@@ -53,7 +53,7 @@ export default function UsersPage() {
                 </td>
               </tr>
             ))}
-            {list.data?.content.length === 0 && <tr><td colSpan={6} className="muted">Aucun utilisateur.</td></tr>}
+            {list.data?.content.length === 0 && <tr><td colSpan={6} className="empty">Aucun utilisateur.</td></tr>}
           </tbody>
         </table></div>
         <Pager page={page} totalPages={list.data?.totalPages ?? 0} onChange={setPage} />
