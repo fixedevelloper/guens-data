@@ -1,0 +1,41 @@
+# Profil production : aucune valeur par défaut — toute variable manquante empêche le démarrage.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: false
+
+server:
+  # Derrière un reverse proxy de confiance (nginx/traefik) : IP réelle pour la limitation de débit.
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+  crypto:
+    aes-key-base64: ${AES_KEY_BASE64}
+    hash-pepper: ${HASH_PEPPER}
+  storage:
+    minio:
+      endpoint: ${MINIO_ENDPOINT}
+      access-key: ${MINIO_ACCESS_KEY}
+      secret-key: ${MINIO_SECRET_KEY}
+      bucket: ${MINIO_BUCKET}
+      public-url: ${MINIO_PUBLIC_URL:${MINIO_ENDPOINT}}
+  bootstrap-admin:
+    username: ${ADMIN_USER}
+    password: ${ADMIN_PASSWORD}
+  cors:
+    allowed-origins: ${CORS_ORIGINS}
