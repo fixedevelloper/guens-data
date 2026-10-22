@@ -22,8 +22,10 @@ jobs:
       matrix:
         include:
           - name: api
+            image: field-collect-api
             context: ./field-collect-api
           - name: dashboard
+            image: dashboard
             context: ./dashboard
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +44,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.name }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
